@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kompresin — Perkecil Ukuran File</title>
+  <meta name="description" content="Perkecil ukuran gambar, PDF, dan dokumen Office langsung di browser. Format tetap sama, file tidak diunggah ke server.">
+  <meta name="theme-color" content="#0f5f8a">
+  <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYmciIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjMTRiOGE2Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzBmNWY4YSIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSIxMTIiIGZpbGw9InVybCgjYmcpIi8+CiAgPCEtLSBkb2t1bWVuIC0tPgogIDxwYXRoIGQ9Ik0xNzYgMTEyaDExOGw2NiA2NnYxOTZhMjYgMjYgMCAwIDEtMjYgMjZIMTc2YTI2IDI2IDAgMCAxLTI2LTI2VjEzOGEyNiAyNiAwIDAgMSAyNi0yNnoiIGZpbGw9IiNmZmZmZmYiLz4KICA8cGF0aCBkPSJNMjk0IDExMnY1MGExNiAxNiAwIDAgMCAxNiAxNmg1MHoiIGZpbGw9IiNjOWVlZjAiLz4KICA8IS0tIHBhbmFoIG1lbmVrYW4ga2UgZGFsYW0gLS0+CiAgPGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMGY2ZjhhIiBzdHJva2Utd2lkdGg9IjIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogICAgPHBhdGggZD0iTTI1NSAxOTZ2NjJNMjI2IDIzMmwyOSAyOCAyOS0yOCIvPgogICAgPHBhdGggZD0iTTI1NSAzNjJ2LTQ2TTIyNiAzNDBsMjktMjYgMjkgMjYiLz4KICAgIDxwYXRoIGQ9Ik0yMDYgMjg4aDk4Ii8+CiAgPC9nPgogIDwhLS0gbGVuY2FuYSAtLT4KICA8Y2lyY2xlIGN4PSIzNzIiIGN5PSIzODQiIHI9IjU4IiBmaWxsPSIjZjU5ZTBiIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMTIiLz4KICA8cGF0aCBkPSJNMzQ3IDM4NGg1MCIgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utd2lkdGg9IjE2IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPC9zdmc+Cg==" type="image/svg+xml">
+  <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <style>
+:root {
+  --bg: #f3f7f8; --card: #fff; --ink: #11232e; --muted: #5d7280;
+  --line: #dbe5ea; --brand: #0f6f8a; --brand2: #14b8a6; --ok: #0f9d6b; --warn: #c27c0e; --err: #c2410c;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #0d171d; --card: #15232b; --ink: #e6f0f3; --muted: #93a8b3; --line: #243641; --brand: #38bdf8; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); }
+main { max-width: 760px; margin: 0 auto; padding: 0 16px 24px; }
+.top { max-width: 760px; margin: 0 auto; padding: 24px 16px 16px; display: flex; gap: 14px; align-items: center; }
+.logo { width: 52px; height: 52px; }
+h1 { margin: 0; font-size: 1.5rem; }
+.top p { margin: 0; color: var(--muted); }
+
+.drop { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center;
+  padding: 34px 16px; border: 2px dashed var(--line); border-radius: 16px; background: var(--card); cursor: pointer; transition: .15s; }
+.drop:hover, .drop.over { border-color: var(--brand2); background: color-mix(in srgb, var(--brand2) 8%, var(--card)); }
+.drop input { display: none; }
+.drop svg { width: 40px; height: 40px; fill: none; stroke: var(--brand); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.drop span { color: var(--muted); font-size: .85rem; }
+
+.panel { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; margin-top: 14px; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+.lbl { font-weight: 600; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.seg button { border: 0; background: transparent; color: var(--ink); padding: 8px 14px; font: inherit; cursor: pointer; }
+.seg button.on { background: var(--brand); color: #fff; }
+.hint { margin: 8px 0 0; color: var(--muted); font-size: .88rem; }
+details { margin-top: 10px; }
+summary { cursor: pointer; color: var(--brand); font-weight: 500; }
+.adv { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 10px; }
+.adv label { display: flex; flex-direction: column; gap: 4px; font-size: .88rem; color: var(--muted); }
+.adv input, .adv select { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 7px 8px; }
+.adv input[type=range] { padding: 0; }
+
+.listHead { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
+.listHead h2 { margin: 0; font-size: 1.1rem; }
+.total { margin: 4px 0 8px; color: var(--muted); font-size: .9rem; }
+#list { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.item { display: flex; gap: 12px; align-items: center; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+.badge { flex: none; width: 46px; height: 46px; border-radius: 10px; display: grid; place-items: center; font-size: .72rem; font-weight: 700; color: #fff; background: var(--brand); text-transform: uppercase; }
+.badge.pdf { background: #dc2626; } .badge.img { background: #7c3aed; } .badge.doc { background: #2563eb; }
+.info { flex: 1; min-width: 0; }
+.name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.meta { font-size: .85rem; color: var(--muted); }
+.meta .ok { color: var(--ok); font-weight: 600; } .meta .warn { color: var(--warn); } .meta .err { color: var(--err); }
+.bar { height: 4px; background: var(--line); border-radius: 4px; margin-top: 6px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--brand2), var(--brand)); transition: width .2s; }
+.item.done .bar { display: none; }
+
+.btn { border: 0; background: var(--brand); color: #fff; padding: 8px 14px; border-radius: 10px; font: inherit; font-weight: 500; cursor: pointer; text-decoration: none; white-space: nowrap; }
+.btn:disabled { opacity: .45; cursor: default; }
+.btn.ghost { background: transparent; color: var(--brand); border: 1px solid var(--line); }
+.privacy { text-align: center; color: var(--muted); font-size: .85rem; margin-top: 22px; }
+footer { text-align: center; color: var(--muted); font-size: .8rem; padding: 0 0 24px; }
+footer a { color: var(--brand); }
+</style>
+</head>
+<body>
+  <header class="top">
+    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYmciIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjMTRiOGE2Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzBmNWY4YSIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSIxMTIiIGZpbGw9InVybCgjYmcpIi8+CiAgPCEtLSBkb2t1bWVuIC0tPgogIDxwYXRoIGQ9Ik0xNzYgMTEyaDExOGw2NiA2NnYxOTZhMjYgMjYgMCAwIDEtMjYgMjZIMTc2YTI2IDI2IDAgMCAxLTI2LTI2VjEzOGEyNiAyNiAwIDAgMSAyNi0yNnoiIGZpbGw9IiNmZmZmZmYiLz4KICA8cGF0aCBkPSJNMjk0IDExMnY1MGExNiAxNiAwIDAgMCAxNiAxNmg1MHoiIGZpbGw9IiNjOWVlZjAiLz4KICA8IS0tIHBhbmFoIG1lbmVrYW4ga2UgZGFsYW0gLS0+CiAgPGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMGY2ZjhhIiBzdHJva2Utd2lkdGg9IjIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogICAgPHBhdGggZD0iTTI1NSAxOTZ2NjJNMjI2IDIzMmwyOSAyOCAyOS0yOCIvPgogICAgPHBhdGggZD0iTTI1NSAzNjJ2LTQ2TTIyNiAzNDBsMjktMjYgMjkgMjYiLz4KICAgIDxwYXRoIGQ9Ik0yMDYgMjg4aDk4Ii8+CiAgPC9nPgogIDwhLS0gbGVuY2FuYSAtLT4KICA8Y2lyY2xlIGN4PSIzNzIiIGN5PSIzODQiIHI9IjU4IiBmaWxsPSIjZjU5ZTBiIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMTIiLz4KICA8cGF0aCBkPSJNMzQ3IDM4NGg1MCIgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utd2lkdGg9IjE2IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPC9zdmc+Cg==" alt="" class="logo">
+    <div>
+      <h1>Kompresin</h1>
+      <p>Perkecil ukuran file — format tetap sama.</p>
+    </div>
+  </header>
+
+  <main>
+    <label id="drop" class="drop" for="picker">
+      <input id="picker" type="file" multiple
+        accept=".pdf,.jpg,.jpeg,.png,.webp,.docx,.xlsx,.pptx,.odt,.ods,.odp,image/jpeg,image/png,image/webp,application/pdf">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+      <strong>Pilih file atau seret ke sini</strong>
+      <span>PDF · JPG · PNG · WebP · DOCX · XLSX · PPTX · ODT/ODS/ODP</span>
+    </label>
+
+    <section class="panel">
+      <div class="row">
+        <span class="lbl">Tingkat kompresi</span>
+        <div class="seg" id="level">
+          <button data-v="ringan">Ringan</button>
+          <button data-v="seimbang" class="on">Seimbang</button>
+          <button data-v="maksimal">Maksimal</button>
+        </div>
+      </div>
+      <p class="hint" id="levelHint"></p>
+
+      <details>
+        <summary>Pengaturan lanjutan</summary>
+        <div class="adv">
+          <label>Kualitas gambar <output id="qOut"></output>
+            <input type="range" id="quality" min="10" max="95" step="5">
+          </label>
+          <label>Lebar/tinggi maks. gambar (px)
+            <input type="number" id="maxDim" min="320" max="8000" step="10">
+          </label>
+          <label>Resolusi halaman PDF (DPI)
+            <input type="number" id="dpi" min="50" max="300" step="5">
+          </label>
+          <label>Mode PDF
+            <select id="pdfMode">
+              <option value="pintar">Pintar — pilih hasil paling kecil</option>
+              <option value="teks">Pertahankan teks (bisa dicari/disalin)</option>
+              <option value="gambar">Paksa jadi gambar (paling kecil untuk scan)</option>
+            </select>
+          </label>
+        </div>
+      </details>
+    </section>
+
+    <section id="listWrap" hidden>
+      <div class="listHead">
+        <h2>File</h2>
+        <div>
+          <button id="dlAll" class="btn" disabled>Unduh semua</button>
+          <button id="clear" class="btn ghost">Bersihkan</button>
+        </div>
+      </div>
+      <p class="total" id="total"></p>
+      <ul id="list"></ul>
+    </section>
+
+    <p class="privacy">🔒 Semua proses berjalan di perangkat Anda. File tidak pernah diunggah ke server.</p>
+  </main>
+
+  <footer>Kompresin · sumber terbuka · <a href="https://github.com/" id="repoLink">GitHub</a></footer>
+
+  <template id="itemTpl">
+    <li class="item">
+      <div class="badge"></div>
+      <div class="info">
+        <div class="name"></div>
+        <div class="meta"></div>
+        <div class="bar"><i></i></div>
+      </div>
+      <a class="btn dl" hidden>Unduh</a>
+    </li>
+  </template>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/1.0.11/pako.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/upng-js@2.1.0/UPNG.js"></script>
+  <script>
+/* Kompresin — kompres file di browser, format tetap sama. */
+'use strict';
+
+const $ = (s) => document.querySelector(s);
+
+const PRESETS = {
+  ringan:   { quality: 80, maxDim: 3000, dpi: 150, pngColors: 0,   hint: 'Kualitas hampir tidak berubah, pengurangan ukuran kecil–sedang.' },
+  seimbang: { quality: 65, maxDim: 2000, dpi: 120, pngColors: 256, hint: 'Pilihan terbaik untuk kebanyakan file: jauh lebih kecil, tetap jelas dibaca.' },
+  maksimal: { quality: 45, maxDim: 1400, dpi: 90,  pngColors: 128, hint: 'Ukuran sekecil mungkin. Cocok untuk kirim via WA/email atau batas upload ketat.' },
+};
+
+let level = 'seimbang';
+const items = [];          // { file, el, result, name }
+let queue = Promise.resolve();
+
+if (window.pdfjsLib) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+/* ---------- pengaturan ---------- */
+function applyPreset(name) {
+  level = name;
+  const p = PRESETS[name];
+  document.querySelectorAll('#level button').forEach((b) => b.classList.toggle('on', b.dataset.v === name));
+  $('#quality').value = p.quality;
+  $('#maxDim').value = p.maxDim;
+  $('#dpi').value = p.dpi;
+  $('#qOut').textContent = p.quality + '%';
+  $('#levelHint').textContent = p.hint;
+}
+function getOpts() {
+  return {
+    quality: clamp(+$('#quality').value, 10, 95) / 100,
+    maxDim: clamp(+$('#maxDim').value || 2000, 320, 8000),
+    dpi: clamp(+$('#dpi').value || 120, 50, 300),
+    pngColors: PRESETS[level].pngColors,
+    pdfMode: $('#pdfMode').value,
+  };
+}
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+$('#level').addEventListener('click', (e) => { if (e.target.dataset.v) applyPreset(e.target.dataset.v); });
+$('#quality').addEventListener('input', (e) => ($('#qOut').textContent = e.target.value + '%'));
+applyPreset('seimbang');
+
+/* ---------- input file ---------- */
+const drop = $('#drop');
+$('#picker').addEventListener('change', (e) => { addFiles(e.target.files); e.target.value = ''; });
+['dragenter', 'dragover'].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', (e) => addFiles(e.dataTransfer.files));
+
+function kind(file) {
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (ext === 'pdf' || file.type === 'application/pdf') return 'pdf';
+  if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) return 'img';
+  if (['docx', 'xlsx', 'pptx', 'odt', 'ods', 'odp'].includes(ext)) return 'doc';
+  return null;
+}
+
+function addFiles(fileList) {
+  $('#listWrap').hidden = false;
+  for (const file of fileList) {
+    const el = $('#itemTpl').content.firstElementChild.cloneNode(true);
+    const k = kind(file);
+    const ext = file.name.split('.').pop().toLowerCase();
+    el.querySelector('.badge').textContent = ext.slice(0, 4);
+    el.querySelector('.badge').classList.add(k || 'x');
+    el.querySelector('.name').textContent = file.name;
+    const item = { file, el, result: null };
+    items.push(item);
+    $('#list').appendChild(el);
+    if (!k) { setMeta(item, `${fmt(file.size)} · <span class="err">Format belum didukung</span>`); done(item); continue; }
+    setMeta(item, `${fmt(file.size)} · menunggu…`);
+    const opts = getOpts();
+    queue = queue.then(() => processItem(item, k, opts));
+  }
+}
+
+async function processItem(item, k, opts) {
+  const { file } = item;
+  setMeta(item, `${fmt(file.size)} · memproses…`);
+  const progress = (p) => (item.el.querySelector('.bar i').style.width = Math.round(p * 100) + '%');
+  try {
+    let blob;
+    if (k === 'img') blob = await compressImage(file, opts);
+    else if (k === 'pdf') blob = await compressPdf(file, opts, progress);
+    else blob = await compressOffice(file, opts, progress);
+
+    if (!blob || blob.size >= file.size) {
+      setMeta(item, `${fmt(file.size)} · <span class="warn">Sudah optimal, tidak bisa diperkecil lagi</span>`);
+      item.result = null;
+    } else {
+      const saved = 1 - blob.size / file.size;
+      item.result = blob;
+      setMeta(item, `${fmt(file.size)} → <b>${fmt(blob.size)}</b> · <span class="ok">hemat ${Math.round(saved * 100)}%</span>`);
+      const a = item.el.querySelector('.dl');
+      a.href = URL.createObjectURL(blob);
+      a.download = item.name = outName(file.name);
+      a.hidden = false;
+    }
+  } catch (err) {
+    console.error(err);
+    const msg = /password|encrypt/i.test(String(err)) ? 'PDF terkunci password' : 'Gagal memproses file';
+    setMeta(item, `${fmt(file.size)} · <span class="err">${msg}</span>`);
+  }
+  done(item);
+}
+
+function done(item) { item.el.classList.add('done'); updateTotal(); }
+function setMeta(item, html) { item.el.querySelector('.meta').innerHTML = html; }
+function outName(name) { return name.replace(/(\.[^.]+)$/, '-kecil$1'); }
+function fmt(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1048576) return (b / 1024).toFixed(b < 10240 ? 1 : 0) + ' KB';
+  return (b / 1048576).toFixed(2) + ' MB';
+}
+function updateTotal() {
+  const ok = items.filter((i) => i.result);
+  $('#dlAll').disabled = ok.length === 0;
+  if (!ok.length) { $('#total').textContent = ''; return; }
+  const before = ok.reduce((s, i) => s + i.file.size, 0);
+  const after = ok.reduce((s, i) => s + i.result.size, 0);
+  $('#total').textContent = `Total: ${fmt(before)} → ${fmt(after)} (hemat ${fmt(before - after)})`;
+}
+
+$('#dlAll').addEventListener('click', async () => {
+  for (const i of items.filter((x) => x.result)) {
+    i.el.querySelector('.dl').click();
+    await new Promise((r) => setTimeout(r, 400)); // jeda agar browser tidak memblokir unduhan beruntun
+  }
+});
+$('#clear').addEventListener('click', () => {
+  items.forEach((i) => { const a = i.el.querySelector('.dl'); if (a.href) URL.revokeObjectURL(a.href); });
+  items.length = 0; $('#list').innerHTML = ''; $('#listWrap').hidden = true; updateTotal();
+});
+
+/* ---------- gambar ---------- */
+function canvasToBlob(canvas, type, q) {
+  return new Promise((res) => canvas.toBlob(res, type, q));
+}
+function mimeOf(name, fallback) {
+  const ext = name.split('.').pop().toLowerCase();
+  return { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp' }[ext] || fallback;
+}
+
+/** Kompres satu gambar; hasil berformat sama dengan aslinya. */
+async function compressImage(blob, opts, nameHint) {
+  const type = mimeOf(nameHint || blob.name || '', blob.type);
+  const bmp = await createImageBitmap(blob);
+  const s = Math.min(1, opts.maxDim / Math.max(bmp.width, bmp.height));
+  const w = Math.max(1, Math.round(bmp.width * s));
+  const h = Math.max(1, Math.round(bmp.height * s));
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const ctx = c.getContext('2d');
+  ctx.imageSmoothingQuality = 'high';
+  if (type === 'image/jpeg') { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h); }
+  ctx.drawImage(bmp, 0, 0, w, h);
+  bmp.close && bmp.close();
+
+  if (type === 'image/png') {
+    if (window.UPNG) {
+      const data = ctx.getImageData(0, 0, w, h).data;
+      const buf = UPNG.encode([data.buffer], w, h, opts.pngColors); // 0 = lossless, 256/128 = kuantisasi warna
+      return new Blob([buf], { type: 'image/png' });
+    }
+    return canvasToBlob(c, 'image/png');
+  }
+  const out = await canvasToBlob(c, type, opts.quality);
+  // Beberapa browser (mis. Safari lama) tidak bisa membuat WebP → jangan ganti format.
+  return out && out.type === type ? out : null;
+}
+
+/* ---------- PDF ---------- */
+async function compressPdf(file, opts, progress) {
+  const buf = await file.arrayBuffer();
+  const candidates = [];
+
+  // 1) Optimasi struktur (teks tetap bisa dicari/disalin)
+  if (opts.pdfMode !== 'gambar') {
+    try {
+      const doc = await PDFLib.PDFDocument.load(buf.slice(0), { updateMetadata: false });
+      const bytes = await doc.save({ useObjectStreams: true });
+      candidates.push(new Blob([bytes], { type: 'application/pdf' }));
+    } catch (e) { if (opts.pdfMode === 'teks') throw e; }
+  }
+
+  // 2) Render ulang tiap halaman jadi JPEG (paling efektif untuk hasil scan/foto)
+  if (opts.pdfMode !== 'teks') {
+    const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buf.slice(0)) }).promise;
+    const out = await PDFLib.PDFDocument.create();
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const base = page.getViewport({ scale: 1 });
+      let scale = opts.dpi / 72;
+      const maxPx = 14e6; // batas aman ukuran canvas
+      if (base.width * base.height * scale * scale > maxPx) scale = Math.sqrt(maxPx / (base.width * base.height));
+      const vp = page.getViewport({ scale });
+      canvas.width = Math.ceil(vp.width); canvas.height = Math.ceil(vp.height);
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      await page.render({ canvasContext: ctx, viewport: vp }).promise;
+      const jpg = await canvasToBlob(canvas, 'image/jpeg', opts.quality);
+      const img = await out.embedJpg(await jpg.arrayBuffer());
+      const p = out.addPage([base.width, base.height]);
+      p.drawImage(img, { x: 0, y: 0, width: base.width, height: base.height });
+      page.cleanup();
+      progress(i / pdf.numPages);
+    }
+    pdf.destroy();
+    const bytes = await out.save({ useObjectStreams: true });
+    candidates.push(new Blob([bytes], { type: 'application/pdf' }));
+  }
+
+  progress(1);
+  return candidates.sort((a, b) => a.size - b.size)[0] || null;
+}
+
+/* ---------- DOCX / XLSX / PPTX / ODT dll. ---------- */
+async function compressOffice(file, opts, progress) {
+  const zip = await JSZip.loadAsync(file);
+  const media = Object.values(zip.files).filter((f) => !f.dir && /\.(jpe?g|png)$/i.test(f.name));
+  let n = 0;
+  for (const f of media) {
+    try {
+      const original = await f.async('blob');
+      const smaller = await compressImage(original, opts, f.name);
+      if (smaller && smaller.size < original.size) zip.file(f.name, smaller);
+    } catch (e) { /* lewati gambar yang tidak bisa dibaca (mis. EMF) */ }
+    progress(++n / (media.length + 1));
+  }
+  // Dokumen OpenDocument mewajibkan file "mimetype" tidak terkompresi.
+  if (zip.files['mimetype']) zip.file('mimetype', await zip.file('mimetype').async('string'), { compression: 'STORE' });
+  const blob = await zip.generateAsync({
+    type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 9 }, mimeType: file.type,
+  });
+  progress(1);
+  return blob;
+}
+
+/* ---------- PWA (bisa dipasang & dipakai offline setelah dibuka sekali) ---------- */
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
