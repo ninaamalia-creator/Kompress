@@ -1,7 +1,7 @@
 {
-  "name": "Kompresin — Perkecil Ukuran File",
-  "short_name": "Kompresin",
-  "description": "Perkecil ukuran PDF, gambar, dan dokumen Office tanpa mengubah format.",
+  "name": "Scan & Kompress",
+  "short_name": "Scan & Kompress",
+  "description": "Scan dokumen dari kamera/galeri dan perkecil ukuran PDF, gambar, dan dokumen Office.",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f3f7f8",

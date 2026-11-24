@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Kompresin — Perkecil Ukuran File</title>
-  <meta name="description" content="Perkecil ukuran gambar, PDF, dan dokumen Office langsung di browser. Format tetap sama, file tidak diunggah ke server.">
+  <title>Scan &amp; Kompress</title>
+  <meta name="description" content="Scan dokumen dari kamera/galeri dan perkecil ukuran PDF, gambar, dan dokumen Office langsung di HP. Format tetap sama, file tidak diunggah ke server.">
   <meta name="theme-color" content="#0f5f8a">
   <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYmciIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjMTRiOGE2Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzBmNWY4YSIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSIxMTIiIGZpbGw9InVybCgjYmcpIi8+CiAgPCEtLSBkb2t1bWVuIC0tPgogIDxwYXRoIGQ9Ik0xNzYgMTEyaDExOGw2NiA2NnYxOTZhMjYgMjYgMCAwIDEtMjYgMjZIMTc2YTI2IDI2IDAgMCAxLTI2LTI2VjEzOGEyNiAyNiAwIDAgMSAyNi0yNnoiIGZpbGw9IiNmZmZmZmYiLz4KICA8cGF0aCBkPSJNMjk0IDExMnY1MGExNiAxNiAwIDAgMCAxNiAxNmg1MHoiIGZpbGw9IiNjOWVlZjAiLz4KICA8IS0tIHBhbmFoIG1lbmVrYW4ga2UgZGFsYW0gLS0+CiAgPGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMGY2ZjhhIiBzdHJva2Utd2lkdGg9IjIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogICAgPHBhdGggZD0iTTI1NSAxOTZ2NjJNMjI2IDIzMmwyOSAyOCAyOS0yOCIvPgogICAgPHBhdGggZD0iTTI1NSAzNjJ2LTQ2TTIyNiAzNDBsMjktMjYgMjkgMjYiLz4KICAgIDxwYXRoIGQ9Ik0yMDYgMjg4aDk4Ii8+CiAgPC9nPgogIDwhLS0gbGVuY2FuYSAtLT4KICA8Y2lyY2xlIGN4PSIzNzIiIGN5PSIzODQiIHI9IjU4IiBmaWxsPSIjZjU5ZTBiIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMTIiLz4KICA8cGF0aCBkPSJNMzQ3IDM4NGg1MCIgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utd2lkdGg9IjE2IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPC9zdmc+Cg==" type="image/svg+xml">
   <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
@@ -68,76 +68,175 @@ summary { cursor: pointer; color: var(--brand); font-weight: 500; }
 .privacy { text-align: center; color: var(--muted); font-size: .85rem; margin-top: 22px; }
 footer { text-align: center; color: var(--muted); font-size: .8rem; padding: 0 0 24px; }
 footer a { color: var(--brand); }
+
+/* ---------- tab ---------- */
+.tabs { max-width: 760px; margin: 0 auto 14px; padding: 0 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tabs button { font: inherit; font-weight: 600; padding: 11px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; }
+.tabs button.on { background: var(--brand); border-color: var(--brand); color: #fff; }
+
+/* ---------- scan ---------- */
+.scanBtns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.bigBtn { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 22px 10px; border-radius: 16px; font-weight: 600; cursor: pointer;
+  background: linear-gradient(135deg, var(--brand2), #0f5f8a); color: #fff; }
+.bigBtn.alt { background: var(--card); color: var(--ink); border: 1px solid var(--line); }
+.bigBtn span { font-size: 2rem; line-height: 1; }
+.empty { text-align: center; color: var(--muted); padding: 22px 12px; font-size: .92rem; }
+.pages { list-style: none; padding: 0; margin: 14px 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.page { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 6px; }
+.thumb { position: relative; display: grid; place-items: center; aspect-ratio: 3/4; background: #888; border-radius: 8px; overflow: hidden; }
+.thumb canvas { max-width: 100%; max-height: 100%; }
+.num { position: absolute; top: 4px; left: 4px; background: rgba(0,0,0,.65); color: #fff; font-size: .75rem; font-weight: 700; border-radius: 6px; padding: 1px 7px; }
+.pbtns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 6px; }
+.pbtns button { font: inherit; font-size: .95rem; padding: 5px 0; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); cursor: pointer; }
+.pbtns button:disabled { opacity: .3; }
+.panel .row + .row, .panel .hint + .row { margin-top: 12px; }
+.txt { flex: 1; min-width: 160px; font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; }
+.btn.wide { display: block; width: 100%; margin-top: 14px; padding: 12px; font-size: 1rem; }
+.result { border-color: var(--ok); }
+.resInfo span { color: var(--muted); font-size: .9rem; }
+.resBtns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.resBtns .btn { padding: 11px; }
+.acts { display: flex; gap: 6px; }
 </style>
 </head>
 <body>
   <header class="top">
     <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYmciIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjMTRiOGE2Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzBmNWY4YSIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSIxMTIiIGZpbGw9InVybCgjYmcpIi8+CiAgPCEtLSBkb2t1bWVuIC0tPgogIDxwYXRoIGQ9Ik0xNzYgMTEyaDExOGw2NiA2NnYxOTZhMjYgMjYgMCAwIDEtMjYgMjZIMTc2YTI2IDI2IDAgMCAxLTI2LTI2VjEzOGEyNiAyNiAwIDAgMSAyNi0yNnoiIGZpbGw9IiNmZmZmZmYiLz4KICA8cGF0aCBkPSJNMjk0IDExMnY1MGExNiAxNiAwIDAgMCAxNiAxNmg1MHoiIGZpbGw9IiNjOWVlZjAiLz4KICA8IS0tIHBhbmFoIG1lbmVrYW4ga2UgZGFsYW0gLS0+CiAgPGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMGY2ZjhhIiBzdHJva2Utd2lkdGg9IjIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogICAgPHBhdGggZD0iTTI1NSAxOTZ2NjJNMjI2IDIzMmwyOSAyOCAyOS0yOCIvPgogICAgPHBhdGggZD0iTTI1NSAzNjJ2LTQ2TTIyNiAzNDBsMjktMjYgMjkgMjYiLz4KICAgIDxwYXRoIGQ9Ik0yMDYgMjg4aDk4Ii8+CiAgPC9nPgogIDwhLS0gbGVuY2FuYSAtLT4KICA8Y2lyY2xlIGN4PSIzNzIiIGN5PSIzODQiIHI9IjU4IiBmaWxsPSIjZjU5ZTBiIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMTIiLz4KICA8cGF0aCBkPSJNMzQ3IDM4NGg1MCIgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utd2lkdGg9IjE2IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPC9zdmc+Cg==" alt="" class="logo">
     <div>
-      <h1>Kompresin</h1>
-      <p>Perkecil ukuran file — format tetap sama.</p>
+      <h1>Scan &amp; Kompress</h1>
+      <p>Scan dokumen &amp; perkecil ukuran file.</p>
     </div>
   </header>
 
+  <nav class="tabs" id="tabs">
+    <button data-tab="scan" class="on">📷 Scan</button>
+    <button data-tab="kompres">🗜️ Kompres</button>
+  </nav>
+
   <main>
-    <label id="drop" class="drop" for="picker">
-      <input id="picker" type="file" multiple
-        accept=".pdf,.jpg,.jpeg,.png,.webp,.docx,.xlsx,.pptx,.odt,.ods,.odp,image/jpeg,image/png,image/webp,application/pdf">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
-      <strong>Pilih file atau seret ke sini</strong>
-      <span>PDF · JPG · PNG · WebP · DOCX · XLSX · PPTX · ODT/ODS/ODP</span>
-    </label>
-
-    <section class="panel">
-      <div class="row">
-        <span class="lbl">Tingkat kompresi</span>
-        <div class="seg" id="level">
-          <button data-v="ringan">Ringan</button>
-          <button data-v="seimbang" class="on">Seimbang</button>
-          <button data-v="maksimal">Maksimal</button>
-        </div>
+    <!-- ================= SCAN ================= -->
+    <section id="tab-scan">
+      <div class="scanBtns">
+        <label class="bigBtn">
+          <input id="camIn" type="file" accept="image/*" capture="environment" hidden>
+          <span>📷</span> Kamera
+        </label>
+        <label class="bigBtn alt">
+          <input id="galIn" type="file" accept="image/*" multiple hidden>
+          <span>🖼️</span> Galeri
+        </label>
       </div>
-      <p class="hint" id="levelHint"></p>
 
-      <details>
-        <summary>Pengaturan lanjutan</summary>
-        <div class="adv">
-          <label>Kualitas gambar <output id="qOut"></output>
-            <input type="range" id="quality" min="10" max="95" step="5">
-          </label>
-          <label>Lebar/tinggi maks. gambar (px)
-            <input type="number" id="maxDim" min="320" max="8000" step="10">
-          </label>
-          <label>Resolusi halaman PDF (DPI)
-            <input type="number" id="dpi" min="50" max="300" step="5">
-          </label>
-          <label>Mode PDF
-            <select id="pdfMode">
-              <option value="pintar">Pintar — pilih hasil paling kecil</option>
-              <option value="teks">Pertahankan teks (bisa dicari/disalin)</option>
-              <option value="gambar">Paksa jadi gambar (paling kecil untuk scan)</option>
-            </select>
-          </label>
-        </div>
-      </details>
+      <div id="scanEmpty" class="empty">Ambil foto dokumen dengan kamera atau pilih dari galeri. Bisa banyak halaman sekaligus.</div>
+
+      <div id="scanWork" hidden>
+        <ul id="pages" class="pages"></ul>
+
+        <section class="panel">
+          <div class="row">
+            <span class="lbl">Warna</span>
+            <div class="seg" id="scanMode">
+              <button data-v="asli">Asli</button>
+              <button data-v="abu">Abu-abu</button>
+              <button data-v="jernih" class="on">✨ Jernih</button>
+            </div>
+          </div>
+          <p class="hint" id="modeHint"></p>
+          <div class="row">
+            <span class="lbl">Hasil</span>
+            <div class="seg" id="scanFormat">
+              <button data-v="pdf" class="on">PDF</button>
+              <button data-v="jpg">JPG</button>
+            </div>
+          </div>
+          <div class="row">
+            <span class="lbl">Ukuran file</span>
+            <div class="seg" id="scanSize">
+              <button data-v="kecil">Kecil</button>
+              <button data-v="sedang" class="on">Sedang</button>
+              <button data-v="tinggi">Tinggi</button>
+            </div>
+          </div>
+          <div class="row">
+            <span class="lbl">Nama file</span>
+            <input id="scanName" class="txt">
+          </div>
+          <button id="makeScan" class="btn wide">Buat PDF</button>
+        </section>
+
+        <section id="scanResult" class="panel result" hidden>
+          <div class="resInfo"></div>
+          <div class="resBtns">
+            <button id="resShare" class="btn">📤 Bagikan</button>
+            <button id="resDl" class="btn ghost">⬇️ Unduh</button>
+          </div>
+        </section>
+
+        <button id="scanReset" class="btn ghost wide">Mulai scan baru</button>
+      </div>
     </section>
 
-    <section id="listWrap" hidden>
-      <div class="listHead">
-        <h2>File</h2>
-        <div>
-          <button id="dlAll" class="btn" disabled>Unduh semua</button>
-          <button id="clear" class="btn ghost">Bersihkan</button>
+    <!-- ================= KOMPRES ================= -->
+    <section id="tab-kompres" hidden>
+      <label id="drop" class="drop" for="picker">
+        <input id="picker" type="file" multiple
+          accept=".pdf,.jpg,.jpeg,.png,.webp,.docx,.xlsx,.pptx,.odt,.ods,.odp,image/jpeg,image/png,image/webp,application/pdf">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+        <strong>Pilih file atau seret ke sini</strong>
+        <span>PDF · JPG · PNG · WebP · DOCX · XLSX · PPTX · ODT/ODS/ODP</span>
+      </label>
+
+      <section class="panel">
+        <div class="row">
+          <span class="lbl">Tingkat kompresi</span>
+          <div class="seg" id="level">
+            <button data-v="ringan">Ringan</button>
+            <button data-v="seimbang" class="on">Seimbang</button>
+            <button data-v="maksimal">Maksimal</button>
+          </div>
         </div>
-      </div>
-      <p class="total" id="total"></p>
-      <ul id="list"></ul>
+        <p class="hint" id="levelHint"></p>
+
+        <details>
+          <summary>Pengaturan lanjutan</summary>
+          <div class="adv">
+            <label>Kualitas gambar <output id="qOut"></output>
+              <input type="range" id="quality" min="10" max="95" step="5">
+            </label>
+            <label>Lebar/tinggi maks. gambar (px)
+              <input type="number" id="maxDim" min="320" max="8000" step="10">
+            </label>
+            <label>Resolusi halaman PDF (DPI)
+              <input type="number" id="dpi" min="50" max="300" step="5">
+            </label>
+            <label>Mode PDF
+              <select id="pdfMode">
+                <option value="pintar">Pintar — pilih hasil paling kecil</option>
+                <option value="teks">Pertahankan teks (bisa dicari/disalin)</option>
+                <option value="gambar">Paksa jadi gambar (paling kecil untuk scan)</option>
+              </select>
+            </label>
+          </div>
+        </details>
+      </section>
+
+      <section id="listWrap" hidden>
+        <div class="listHead">
+          <h2>File</h2>
+          <div>
+            <button id="dlAll" class="btn" disabled>Unduh semua</button>
+            <button id="clear" class="btn ghost">Bersihkan</button>
+          </div>
+        </div>
+        <p class="total" id="total"></p>
+        <ul id="list"></ul>
+      </section>
     </section>
 
-    <p class="privacy">🔒 Semua proses berjalan di perangkat Anda. File tidak pernah diunggah ke server.</p>
+    <p class="privacy">🔒 Semua proses berjalan di HP/komputer Anda. File tidak pernah diunggah ke server.</p>
   </main>
 
-  <footer>Kompresin · sumber terbuka · <a href="https://github.com/" id="repoLink">GitHub</a></footer>
+  <footer>Scan &amp; Kompress · sumber terbuka</footer>
 
   <template id="itemTpl">
     <li class="item">
@@ -147,7 +246,22 @@ footer a { color: var(--brand); }
         <div class="meta"></div>
         <div class="bar"><i></i></div>
       </div>
-      <a class="btn dl" hidden>Unduh</a>
+      <div class="acts">
+        <button class="btn share" hidden>📤</button>
+        <a class="btn dl" hidden>Unduh</a>
+      </div>
+    </li>
+  </template>
+
+  <template id="pageTpl">
+    <li class="page">
+      <div class="thumb"><canvas></canvas><span class="num"></span></div>
+      <div class="pbtns">
+        <button data-a="left" title="Geser ke kiri">◀</button>
+        <button data-a="rot" title="Putar">⟳</button>
+        <button data-a="del" title="Hapus">🗑</button>
+        <button data-a="right" title="Geser ke kanan">▶</button>
+      </div>
     </li>
   </template>
 
@@ -157,7 +271,7 @@ footer a { color: var(--brand); }
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/1.0.11/pako.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/upng-js@2.1.0/UPNG.js"></script>
   <script>
-/* Kompresin — kompres file di browser, format tetap sama. */
+/* Scan & Kompress — kompres file di browser, format tetap sama. */
 'use strict';
 
 const $ = (s) => document.querySelector(s);
@@ -257,6 +371,12 @@ async function processItem(item, k, opts) {
       a.href = URL.createObjectURL(blob);
       a.download = item.name = outName(file.name);
       a.hidden = false;
+      const sh = item.el.querySelector('.share');
+      const asFile = new File([blob], item.name, { type: blob.type || file.type });
+      if (canShareFiles([asFile])) {
+        sh.hidden = false;
+        sh.onclick = () => shareFiles([asFile]);
+      }
     }
   } catch (err) {
     console.error(err);
@@ -293,6 +413,25 @@ $('#clear').addEventListener('click', () => {
   items.forEach((i) => { const a = i.el.querySelector('.dl'); if (a.href) URL.revokeObjectURL(a.href); });
   items.length = 0; $('#list').innerHTML = ''; $('#listWrap').hidden = true; updateTotal();
 });
+
+/* ---------- bagikan (WhatsApp, email, Drive, dll.) ---------- */
+function canShareFiles(files) {
+  try { return !!(navigator.canShare && navigator.canShare({ files })); } catch { return false; }
+}
+async function shareFiles(files) {
+  try {
+    await navigator.share({ files, title: files.length === 1 ? files[0].name : 'Hasil Scan & Kompress' });
+  } catch (e) {
+    if (e.name !== 'AbortError') alert('Tidak bisa membagikan dari browser ini. Silakan unduh lalu kirim manual.');
+  }
+}
+function downloadBlob(blob, name) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+}
 
 /* ---------- gambar ---------- */
 function canvasToBlob(canvas, type, q) {
@@ -403,6 +542,288 @@ async function compressOffice(file, opts, progress) {
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
+
+/* Scan & Kompress — fitur scan dokumen dari kamera / galeri. */
+'use strict';
+
+/* ---------- tab ---------- */
+$('#tabs').addEventListener('click', (e) => {
+  const t = e.target.closest('button');
+  if (!t) return;
+  document.querySelectorAll('#tabs button').forEach((b) => b.classList.toggle('on', b === t));
+  $('#tab-scan').hidden = t.dataset.tab !== 'scan';
+  $('#tab-kompres').hidden = t.dataset.tab !== 'kompres';
+});
+
+/* ---------- status ---------- */
+const SIZES = {
+  kecil:  { maxSide: 1600, q: 0.55 },
+  sedang: { maxSide: 2200, q: 0.7 },
+  tinggi: { maxSide: 3200, q: 0.85 },
+};
+const MODE_HINT = {
+  asli: 'Warna sesuai foto aslinya.',
+  abu: 'Hitam-putih bertingkat (abu-abu), kontras dipertajam. Ukuran file lebih kecil.',
+  jernih: 'Bayangan & latar kusam dihapus otomatis: kertas jadi putih bersih, tulisan lebih tegas. Cocok untuk dokumen & tulisan tangan.',
+};
+const scan = { pages: [], mode: 'jernih', format: 'pdf', size: 'sedang', result: null };
+const THUMB = 420;
+
+function segInit(id, key, after) {
+  $(id).addEventListener('click', (e) => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    $(id).querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b));
+    scan[key] = b.dataset.v;
+    after && after();
+  });
+}
+segInit('#scanMode', 'mode', () => { $('#modeHint').textContent = MODE_HINT[scan.mode]; redrawThumbs(); clearResult(); });
+segInit('#scanFormat', 'format', () => { $('#makeScan').textContent = scan.format === 'pdf' ? 'Buat PDF' : 'Buat JPG'; clearResult(); });
+segInit('#scanSize', 'size', clearResult);
+$('#modeHint').textContent = MODE_HINT[scan.mode];
+
+function defaultName() {
+  const d = new Date(), p = (n) => String(n).padStart(2, '0');
+  return `Scan_${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}`;
+}
+$('#scanName').value = defaultName();
+
+/* ---------- tambah halaman ---------- */
+$('#camIn').addEventListener('change', onPick);
+$('#galIn').addEventListener('change', onPick);
+
+async function onPick(e) {
+  const files = [...e.target.files].filter((f) => f.type.startsWith('image/') || /\.(jpe?g|png|webp|heic)$/i.test(f.name));
+  e.target.value = '';
+  for (const f of files) {
+    try {
+      const bmp = await createImageBitmap(f);
+      // simpan versi kecil untuk pratinjau, file asli untuk hasil akhir
+      const s = Math.min(1, THUMB / Math.max(bmp.width, bmp.height));
+      const small = document.createElement('canvas');
+      small.width = Math.round(bmp.width * s); small.height = Math.round(bmp.height * s);
+      small.getContext('2d').drawImage(bmp, 0, 0, small.width, small.height);
+      bmp.close && bmp.close();
+      scan.pages.push({ blob: f, rot: 0, small });
+    } catch (err) {
+      alert(`Gambar "${f.name}" tidak bisa dibaca. Coba format JPG/PNG.`);
+    }
+  }
+  clearResult();
+  renderPages();
+}
+
+/* ---------- daftar halaman ---------- */
+function renderPages() {
+  const ul = $('#pages');
+  ul.innerHTML = '';
+  const has = scan.pages.length > 0;
+  $('#scanWork').hidden = !has;
+  $('#scanEmpty').hidden = has;
+  scan.pages.forEach((pg, i) => {
+    const li = $('#pageTpl').content.firstElementChild.cloneNode(true);
+    li.querySelector('.num').textContent = i + 1;
+    li.querySelector('[data-a=left]').disabled = i === 0;
+    li.querySelector('[data-a=right]').disabled = i === scan.pages.length - 1;
+    li.querySelector('.pbtns').addEventListener('click', (e) => {
+      const a = e.target.closest('button')?.dataset.a;
+      if (!a) return;
+      if (a === 'rot') pg.rot = (pg.rot + 90) % 360;
+      if (a === 'del') scan.pages.splice(i, 1);
+      if (a === 'left') [scan.pages[i - 1], scan.pages[i]] = [scan.pages[i], scan.pages[i - 1]];
+      if (a === 'right') [scan.pages[i + 1], scan.pages[i]] = [scan.pages[i], scan.pages[i + 1]];
+      clearResult();
+      renderPages();
+    });
+    pg.canvas = li.querySelector('canvas');
+    ul.appendChild(li);
+  });
+  redrawThumbs();
+}
+
+function redrawThumbs() {
+  for (const pg of scan.pages) {
+    if (!pg.canvas) continue;
+    const out = processCanvas(pg.small, pg.rot, scan.mode);
+    pg.canvas.width = out.width; pg.canvas.height = out.height;
+    pg.canvas.getContext('2d').drawImage(out, 0, 0);
+  }
+}
+
+$('#scanReset').addEventListener('click', () => {
+  if (scan.pages.length && !confirm('Hapus semua halaman dan mulai baru?')) return;
+  scan.pages = [];
+  clearResult();
+  $('#scanName').value = defaultName();
+  renderPages();
+});
+
+/* ---------- pengolahan gambar ---------- */
+/** Putar + terapkan filter warna. src: canvas atau ImageBitmap. */
+function processCanvas(src, rot, mode, maxSide) {
+  const sw = src.width, sh = src.height;
+  const s = maxSide ? Math.min(1, maxSide / Math.max(sw, sh)) : 1;
+  const w0 = Math.max(1, Math.round(sw * s)), h0 = Math.max(1, Math.round(sh * s));
+  const turned = rot === 90 || rot === 270;
+  const c = document.createElement('canvas');
+  c.width = turned ? h0 : w0; c.height = turned ? w0 : h0;
+  const ctx = c.getContext('2d', { willReadFrequently: true });
+  ctx.imageSmoothingQuality = 'high';
+  ctx.translate(c.width / 2, c.height / 2);
+  ctx.rotate((rot * Math.PI) / 180);
+  ctx.drawImage(src, -w0 / 2, -h0 / 2, w0, h0);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  if (mode !== 'asli') {
+    const img = ctx.getImageData(0, 0, c.width, c.height);
+    if (mode === 'abu') filterGray(img); else filterClean(img);
+    ctx.putImageData(img, 0, 0);
+  }
+  return c;
+}
+
+/** Abu-abu + perentangan kontras otomatis (1%–99%). */
+function filterGray(img) {
+  const d = img.data, n = d.length / 4, hist = new Uint32Array(256);
+  for (let i = 0; i < d.length; i += 4) {
+    const l = (d[i] * 77 + d[i + 1] * 150 + d[i + 2] * 29) >> 8;
+    d[i] = l; hist[l]++;
+  }
+  let lo = 0, hi = 255, acc = 0;
+  for (; lo < 255; lo++) { acc += hist[lo]; if (acc > n * 0.01) break; }
+  acc = 0;
+  for (; hi > 0; hi--) { acc += hist[hi]; if (acc > n * 0.01) break; }
+  const span = Math.max(1, hi - lo);
+  for (let i = 0; i < d.length; i += 4) {
+    const v = Math.max(0, Math.min(255, ((d[i] - lo) * 255) / span));
+    d[i] = d[i + 1] = d[i + 2] = v;
+  }
+}
+
+/**
+ * "Jernih": hapus bayangan & ratakan pencahayaan.
+ * 1) Perkirakan warna kertas (latar) di tiap area dengan max-pooling → tulisan hilang, tersisa latar + bayangan.
+ * 2) Haluskan peta latar, lalu bagi setiap piksel dengan latarnya → bayangan lenyap, kertas jadi putih.
+ * 3) Pertegas tulisan dengan kurva kontras.
+ */
+function filterClean(img) {
+  const { width: w, height: h, data: d } = img;
+  const b = Math.max(6, Math.round(Math.max(w, h) / 40));      // ukuran blok
+  const gw = Math.ceil(w / b), gh = Math.ceil(h / b);
+  let g = new Float32Array(gw * gh * 3);
+  for (let y = 0; y < h; y++) {
+    const gy = ((y / b) | 0) * gw;
+    for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * 4, k = (gy + ((x / b) | 0)) * 3;
+      if (d[i] > g[k]) g[k] = d[i];
+      if (d[i + 1] > g[k + 1]) g[k + 1] = d[i + 1];
+      if (d[i + 2] > g[k + 2]) g[k + 2] = d[i + 2];
+    }
+  }
+  // dilasi 3x3 (hilangkan sisa tulisan tebal) lalu blur 2x
+  g = gridPass(g, gw, gh, 'max');
+  g = gridPass(g, gw, gh, 'avg');
+  g = gridPass(g, gw, gh, 'avg');
+
+  const LO = 0.35, HI = 0.9;   // < LO → hitam, > HI → putih
+  for (let y = 0; y < h; y++) {
+    let fy = (y + 0.5) / b - 0.5; fy = Math.max(0, Math.min(gh - 1, fy));
+    const y0 = fy | 0, y1 = Math.min(gh - 1, y0 + 1), ty = fy - y0;
+    for (let x = 0; x < w; x++) {
+      let fx = (x + 0.5) / b - 0.5; fx = Math.max(0, Math.min(gw - 1, fx));
+      const x0 = fx | 0, x1 = Math.min(gw - 1, x0 + 1), tx = fx - x0;
+      const i = (y * w + x) * 4;
+      for (let c = 0; c < 3; c++) {
+        const a = g[(y0 * gw + x0) * 3 + c], bb = g[(y0 * gw + x1) * 3 + c];
+        const cc = g[(y1 * gw + x0) * 3 + c], dd = g[(y1 * gw + x1) * 3 + c];
+        const bg = (a + (bb - a) * tx) * (1 - ty) + (cc + (dd - cc) * tx) * ty;
+        let t = d[i + c] / Math.max(24, bg);
+        t = (t - LO) / (HI - LO);
+        t = t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t);   // kurva S halus
+        d[i + c] = t * 255;
+      }
+    }
+  }
+}
+
+function gridPass(g, gw, gh, op) {
+  const out = new Float32Array(g.length);
+  for (let y = 0; y < gh; y++) for (let x = 0; x < gw; x++) for (let c = 0; c < 3; c++) {
+    let m = 0, s = 0, n = 0;
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+      const yy = y + dy, xx = x + dx;
+      if (yy < 0 || xx < 0 || yy >= gh || xx >= gw) continue;
+      const v = g[(yy * gw + xx) * 3 + c];
+      if (v > m) m = v; s += v; n++;
+    }
+    out[(y * gw + x) * 3 + c] = op === 'max' ? m : s / n;
+  }
+  return out;
+}
+
+/* ---------- buat hasil ---------- */
+$('#makeScan').addEventListener('click', async () => {
+  if (!scan.pages.length) return;
+  const btn = $('#makeScan');
+  const label = btn.textContent;
+  btn.disabled = true;
+  const { maxSide, q } = SIZES[scan.size];
+  const base = ($('#scanName').value.trim() || defaultName()).replace(/[\\/:*?"<>|]+/g, '-');
+  try {
+    const jpgs = [];
+    for (let i = 0; i < scan.pages.length; i++) {
+      btn.textContent = `Memproses halaman ${i + 1}/${scan.pages.length}…`;
+      const pg = scan.pages[i];
+      const bmp = await createImageBitmap(pg.blob);
+      const c = processCanvas(bmp, pg.rot, scan.mode, maxSide);
+      bmp.close && bmp.close();
+      const blob = await new Promise((r) => c.toBlob(r, 'image/jpeg', q));
+      jpgs.push({ blob, w: c.width, h: c.height });
+      c.width = c.height = 0; // lepas memori
+    }
+
+    let files;
+    if (scan.format === 'pdf') {
+      btn.textContent = 'Menyusun PDF…';
+      const doc = await PDFLib.PDFDocument.create();
+      doc.setTitle(base); doc.setCreator('Scan & Kompress');
+      for (const j of jpgs) {
+        const img = await doc.embedJpg(await j.blob.arrayBuffer());
+        const pw = 595.28;                       // lebar A4 (pt)
+        const ph = (pw * j.h) / j.w;
+        doc.addPage([pw, ph]).drawImage(img, { x: 0, y: 0, width: pw, height: ph });
+      }
+      const bytes = await doc.save({ useObjectStreams: true });
+      files = [new File([bytes], base + '.pdf', { type: 'application/pdf' })];
+    } else {
+      files = jpgs.map((j, i) =>
+        new File([j.blob], jpgs.length > 1 ? `${base}_${i + 1}.jpg` : base + '.jpg', { type: 'image/jpeg' }));
+    }
+    showResult(files);
+  } catch (err) {
+    console.error(err);
+    alert('Gagal membuat hasil scan. Coba ukuran file "Kecil" atau kurangi jumlah halaman.');
+  }
+  btn.textContent = label;
+  btn.disabled = false;
+});
+
+function showResult(files) {
+  scan.result = files;
+  const total = files.reduce((s, f) => s + f.size, 0);
+  const what = files.length === 1 ? files[0].name : `${files.length} file JPG`;
+  $('#scanResult .resInfo').innerHTML = `✅ <b>${what}</b><br><span>${scan.pages.length} halaman · ${fmt(total)}</span>`;
+  $('#resShare').hidden = !canShareFiles(files);
+  $('#scanResult').hidden = false;
+  $('#scanResult').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+function clearResult() { scan.result = null; $('#scanResult').hidden = true; }
+
+$('#resShare').addEventListener('click', () => scan.result && shareFiles(scan.result));
+$('#resDl').addEventListener('click', async () => {
+  if (!scan.result) return;
+  for (const f of scan.result) { downloadBlob(f, f.name); await new Promise((r) => setTimeout(r, 400)); }
+});
 </script>
 </body>
 </html>
