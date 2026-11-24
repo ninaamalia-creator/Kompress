@@ -11,6 +11,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <style>
+[hidden] { display: none !important; }
 :root {
   --bg: #f3f7f8; --card: #fff; --ink: #11232e; --muted: #5d7280;
   --line: #dbe5ea; --brand: #0f6f8a; --brand2: #14b8a6; --ok: #0f9d6b; --warn: #c27c0e; --err: #c2410c;
@@ -94,9 +95,27 @@ footer a { color: var(--brand); }
 .btn.wide { display: block; width: 100%; margin-top: 14px; padding: 12px; font-size: 1rem; }
 .result { border-color: var(--ok); }
 .resInfo span { color: var(--muted); font-size: .9rem; }
-.resBtns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.resBtns { display: flex; gap: 8px; margin-top: 10px; }
+.resBtns .btn { flex: 1; }
 .resBtns .btn { padding: 11px; }
 .acts { display: flex; gap: 6px; }
+
+/* ---------- editor potong & putar ---------- */
+.editor { position: fixed; inset: 0; z-index: 50; background: #0b1216; color: #fff; display: flex; flex-direction: column; }
+.edTop { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; gap: 8px; }
+.edTop .btn.ghost { color: #fff; border-color: #33454f; }
+.edStage { flex: 1; min-height: 0; display: grid; place-items: center; overflow: hidden; }
+.edWrap { position: relative; touch-action: none; }
+.edWrap canvas, .edWrap svg { position: absolute; inset: 0; display: block; }
+.edWrap svg { overflow: visible; }
+.hd { cursor: grab; }
+.edHint { text-align: center; color: #9fb3bd; font-size: .85rem; margin: 6px 12px; }
+.edBar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 8px 12px calc(12px + env(safe-area-inset-bottom)); }
+.edBar button { display: flex; flex-direction: column; align-items: center; gap: 2px; font: inherit; font-size: 1.3rem; color: #fff;
+  background: #16242c; border: 1px solid #2a3c46; border-radius: 12px; padding: 8px 4px; cursor: pointer; }
+.edBar button span { font-size: .72rem; color: #b9cbd3; }
+.thumb { cursor: pointer; }
+.pbtns { grid-template-columns: repeat(5, 1fr); }
 </style>
 </head>
 <body>
@@ -170,6 +189,7 @@ footer a { color: var(--brand); }
             <button id="resShare" class="btn">📤 Bagikan</button>
             <button id="resDl" class="btn ghost">⬇️ Unduh</button>
           </div>
+          <button id="resKompres" class="btn ghost wide">🗜️ Kompres lagi supaya lebih kecil</button>
         </section>
 
         <button id="scanReset" class="btn ghost wide">Mulai scan baru</button>
@@ -238,6 +258,28 @@ footer a { color: var(--brand); }
 
   <footer>Scan &amp; Kompress · sumber terbuka</footer>
 
+  <!-- editor potong & putar -->
+  <div id="editor" class="editor" hidden>
+    <div class="edTop">
+      <button id="edCancel" class="btn ghost">Batal</button>
+      <b>Potong &amp; Putar</b>
+      <button id="edOk" class="btn">Selesai</button>
+    </div>
+    <div class="edStage" id="edStage">
+      <div class="edWrap" id="edWrap">
+        <canvas id="edCanvas"></canvas>
+        <svg id="edSvg"></svg>
+      </div>
+    </div>
+    <p class="edHint">Geser 4 titik ke sudut dokumen. Hasil akan diluruskan otomatis.</p>
+    <div class="edBar">
+      <button id="edRotL">⟲<span>Putar kiri</span></button>
+      <button id="edRotR">⟳<span>Putar kanan</span></button>
+      <button id="edAuto">🔍<span>Deteksi</span></button>
+      <button id="edFull">⛶<span>Semua</span></button>
+    </div>
+  </div>
+
   <template id="itemTpl">
     <li class="item">
       <div class="badge"></div>
@@ -258,6 +300,7 @@ footer a { color: var(--brand); }
       <div class="thumb"><canvas></canvas><span class="num"></span></div>
       <div class="pbtns">
         <button data-a="left" title="Geser ke kiri">◀</button>
+        <button data-a="edit" title="Potong &amp; putar">✂️</button>
         <button data-a="rot" title="Putar">⟳</button>
         <button data-a="del" title="Hapus">🗑</button>
         <button data-a="right" title="Geser ke kanan">▶</button>
@@ -547,12 +590,15 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
 'use strict';
 
 /* ---------- tab ---------- */
+function showTab(name) {
+  document.querySelectorAll('#tabs button').forEach((b) => b.classList.toggle('on', b.dataset.tab === name));
+  $('#tab-scan').hidden = name !== 'scan';
+  $('#tab-kompres').hidden = name !== 'kompres';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 $('#tabs').addEventListener('click', (e) => {
   const t = e.target.closest('button');
-  if (!t) return;
-  document.querySelectorAll('#tabs button').forEach((b) => b.classList.toggle('on', b === t));
-  $('#tab-scan').hidden = t.dataset.tab !== 'scan';
-  $('#tab-kompres').hidden = t.dataset.tab !== 'kompres';
+  if (t) showTab(t.dataset.tab);
 });
 
 /* ---------- status ---------- */
@@ -605,7 +651,7 @@ async function onPick(e) {
       small.width = Math.round(bmp.width * s); small.height = Math.round(bmp.height * s);
       small.getContext('2d').drawImage(bmp, 0, 0, small.width, small.height);
       bmp.close && bmp.close();
-      scan.pages.push({ blob: f, rot: 0, small });
+      scan.pages.push({ blob: f, rot: 0, small, quad: detectQuad(small) });
     } catch (err) {
       alert(`Gambar "${f.name}" tidak bisa dibaca. Coba format JPG/PNG.`);
     }
@@ -629,7 +675,8 @@ function renderPages() {
     li.querySelector('.pbtns').addEventListener('click', (e) => {
       const a = e.target.closest('button')?.dataset.a;
       if (!a) return;
-      if (a === 'rot') pg.rot = (pg.rot + 90) % 360;
+      if (a === 'edit') return openEditor(pg);
+      if (a === 'rot') rotatePage(pg, 1);
       if (a === 'del') scan.pages.splice(i, 1);
       if (a === 'left') [scan.pages[i - 1], scan.pages[i]] = [scan.pages[i], scan.pages[i - 1]];
       if (a === 'right') [scan.pages[i + 1], scan.pages[i]] = [scan.pages[i], scan.pages[i + 1]];
@@ -637,6 +684,7 @@ function renderPages() {
       renderPages();
     });
     pg.canvas = li.querySelector('canvas');
+    li.querySelector('.thumb').addEventListener('click', () => openEditor(pg));
     ul.appendChild(li);
   });
   redrawThumbs();
@@ -645,7 +693,7 @@ function renderPages() {
 function redrawThumbs() {
   for (const pg of scan.pages) {
     if (!pg.canvas) continue;
-    const out = processCanvas(pg.small, pg.rot, scan.mode);
+    const out = processCanvas(pg.small, pg.rot, scan.mode, 0, pg.quad);
     pg.canvas.width = out.width; pg.canvas.height = out.height;
     pg.canvas.getContext('2d').drawImage(out, 0, 0);
   }
@@ -660,8 +708,25 @@ $('#scanReset').addEventListener('click', () => {
 });
 
 /* ---------- pengolahan gambar ---------- */
-/** Putar + terapkan filter warna. src: canvas atau ImageBitmap. */
-function processCanvas(src, rot, mode, maxSide) {
+/** Putar → potong & luruskan (quad) → filter warna. src: canvas atau ImageBitmap. */
+function processCanvas(src, rot, mode, maxSide, quad) {
+  // tahap 1: putar (resolusi dijaga cukup tinggi agar hasil potongan tetap tajam)
+  const cap = maxSide ? (quad ? Math.max(maxSide * 1.6, 2400) : maxSide) : 0;
+  let c = rotateTo(src, rot, cap);
+  // tahap 2: potong & luruskan perspektif
+  if (quad && !isFullQuad(quad)) c = warpQuad(c, quad, maxSide || Math.max(c.width, c.height));
+  else if (maxSide && Math.max(c.width, c.height) > maxSide) c = rotateTo(c, 0, maxSide);
+  // tahap 3: filter
+  if (mode !== 'asli') {
+    const ctx = c.getContext('2d', { willReadFrequently: true });
+    const img = ctx.getImageData(0, 0, c.width, c.height);
+    if (mode === 'abu') filterGray(img); else filterClean(img);
+    ctx.putImageData(img, 0, 0);
+  }
+  return c;
+}
+
+function rotateTo(src, rot, maxSide) {
   const sw = src.width, sh = src.height;
   const s = maxSide ? Math.min(1, maxSide / Math.max(sw, sh)) : 1;
   const w0 = Math.max(1, Math.round(sw * s)), h0 = Math.max(1, Math.round(sh * s));
@@ -673,14 +738,233 @@ function processCanvas(src, rot, mode, maxSide) {
   ctx.translate(c.width / 2, c.height / 2);
   ctx.rotate((rot * Math.PI) / 180);
   ctx.drawImage(src, -w0 / 2, -h0 / 2, w0, h0);
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  if (mode !== 'asli') {
-    const img = ctx.getImageData(0, 0, c.width, c.height);
-    if (mode === 'abu') filterGray(img); else filterClean(img);
-    ctx.putImageData(img, 0, 0);
-  }
   return c;
 }
+
+/* ---------- potong (crop) 4 sudut + pelurusan perspektif ---------- */
+const FULL = () => [[0, 0], [1, 0], [1, 1], [0, 1]]; // TL, TR, BR, BL (0..1)
+function isFullQuad(q) { return FULL().every((p, i) => Math.abs(p[0] - q[i][0]) < 0.003 && Math.abs(p[1] - q[i][1]) < 0.003); }
+
+/** Putar halaman 90° (dir 1 = kanan, -1 = kiri) dan ikut putar titik potongnya. */
+function rotatePage(pg, dir) {
+  pg.rot = (pg.rot + (dir > 0 ? 90 : 270)) % 360;
+  if (pg.quad) pg.quad = rotQuad(pg.quad, dir);
+}
+function rotQuad(q, dir) {
+  if (dir > 0) { const m = ([x, y]) => [1 - y, x]; return [m(q[3]), m(q[0]), m(q[1]), m(q[2])]; }
+  const m = ([x, y]) => [y, 1 - x]; return [m(q[1]), m(q[2]), m(q[3]), m(q[0])];
+}
+
+function dist(a, b) { return Math.hypot(a[0] - b[0], a[1] - b[1]); }
+
+function warpQuad(srcC, quad, maxSide) {
+  const sw = srcC.width, sh = srcC.height;
+  const P = quad.map(([x, y]) => [x * sw, y * sh]);
+  let W = Math.max(dist(P[0], P[1]), dist(P[3], P[2]));
+  let H = Math.max(dist(P[0], P[3]), dist(P[1], P[2]));
+  const k = Math.min(1, maxSide / Math.max(W, H));
+  W = Math.max(1, Math.round(W * k)); H = Math.max(1, Math.round(H * k));
+  const hm = homography([[0, 0], [W, 0], [W, H], [0, H]], P);
+  const sd = srcC.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, sw, sh).data;
+  const out = document.createElement('canvas');
+  out.width = W; out.height = H;
+  const octx = out.getContext('2d', { willReadFrequently: true });
+  const img = octx.createImageData(W, H), od = img.data;
+  const [a, b, c, d, e, f, g, h] = hm;
+  for (let v = 0; v < H; v++) {
+    for (let u = 0; u < W; u++) {
+      const uu = u + 0.5, vv = v + 0.5;
+      const den = g * uu + h * vv + 1;
+      let x = (a * uu + b * vv + c) / den - 0.5, y = (d * uu + e * vv + f) / den - 0.5;
+      x = x < 0 ? 0 : x > sw - 1 ? sw - 1 : x;
+      y = y < 0 ? 0 : y > sh - 1 ? sh - 1 : y;
+      const x0 = x | 0, y0 = y | 0, x1 = Math.min(sw - 1, x0 + 1), y1 = Math.min(sh - 1, y0 + 1);
+      const tx = x - x0, ty = y - y0;
+      const i00 = (y0 * sw + x0) * 4, i10 = (y0 * sw + x1) * 4, i01 = (y1 * sw + x0) * 4, i11 = (y1 * sw + x1) * 4;
+      const o = (v * W + u) * 4;
+      for (let ch = 0; ch < 3; ch++) {
+        const top = sd[i00 + ch] + (sd[i10 + ch] - sd[i00 + ch]) * tx;
+        const bot = sd[i01 + ch] + (sd[i11 + ch] - sd[i01 + ch]) * tx;
+        od[o + ch] = top + (bot - top) * ty;
+      }
+      od[o + 3] = 255;
+    }
+  }
+  octx.putImageData(img, 0, 0);
+  srcC.width = srcC.height = 0;
+  return out;
+}
+
+/** Matriks homografi 3x3 (8 koefisien) yang memetakan titik `from` ke `to`. */
+function homography(from, to) {
+  const A = [], B = [];
+  for (let i = 0; i < 4; i++) {
+    const [u, v] = from[i], [x, y] = to[i];
+    A.push([u, v, 1, 0, 0, 0, -u * x, -v * x]); B.push(x);
+    A.push([0, 0, 0, u, v, 1, -u * y, -v * y]); B.push(y);
+  }
+  // eliminasi Gauss
+  for (let i = 0; i < 8; i++) {
+    let p = i;
+    for (let r = i + 1; r < 8; r++) if (Math.abs(A[r][i]) > Math.abs(A[p][i])) p = r;
+    [A[i], A[p]] = [A[p], A[i]]; [B[i], B[p]] = [B[p], B[i]];
+    for (let r = 0; r < 8; r++) {
+      if (r === i) continue;
+      const f = A[r][i] / A[i][i];
+      for (let c2 = i; c2 < 8; c2++) A[r][c2] -= f * A[i][c2];
+      B[r] -= f * B[i];
+    }
+  }
+  return B.map((v, i) => v / A[i][i]);
+}
+
+/**
+ * Deteksi tepi dokumen otomatis: cari area terang (kertas) terbesar,
+ * lalu ambil 4 titik sudutnya. Mengembalikan null jika tidak yakin.
+ */
+function detectQuad(srcC) {
+  const S = 160;
+  const k = S / Math.max(srcC.width, srcC.height);
+  const w = Math.max(8, Math.round(srcC.width * k)), h = Math.max(8, Math.round(srcC.height * k));
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const ctx = c.getContext('2d', { willReadFrequently: true });
+  ctx.filter = 'blur(1.5px)';
+  ctx.drawImage(srcC, 0, 0, w, h);
+  const d = ctx.getImageData(0, 0, w, h).data;
+  const L = new Uint8Array(w * h), hist = new Uint32Array(256);
+  for (let i = 0; i < w * h; i++) {
+    const r = d[i * 4], g = d[i * 4 + 1], b = d[i * 4 + 2];
+    const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+    const v = Math.max(0, Math.min(255, (r * 77 + g * 150 + b * 29) / 256 - (mx - mn) * 0.6)); // terang & tidak berwarna
+    L[i] = v; hist[v | 0]++;
+  }
+  // ambang Otsu
+  let sum = 0; for (let i = 0; i < 256; i++) sum += i * hist[i];
+  let sB = 0, wB = 0, best = 0, thr = 128;
+  for (let t = 0; t < 256; t++) {
+    wB += hist[t]; if (!wB) continue;
+    const wF = w * h - wB; if (!wF) break;
+    sB += t * hist[t];
+    const mB = sB / wB, mF = (sum - sB) / wF, between = wB * wF * (mB - mF) ** 2;
+    if (between > best) { best = between; thr = t; }
+  }
+  // komponen terang terbesar (flood fill)
+  const lab = new Int32Array(w * h).fill(-1);
+  let bestN = 0, bestId = -1, id = 0;
+  const stack = [];
+  for (let i = 0; i < w * h; i++) {
+    if (lab[i] !== -1 || L[i] <= thr) continue;
+    let n = 0; stack.push(i); lab[i] = id;
+    while (stack.length) {
+      const p = stack.pop(); n++;
+      const x = p % w, y = (p / w) | 0;
+      for (const q of [x > 0 ? p - 1 : -1, x < w - 1 ? p + 1 : -1, y > 0 ? p - w : -1, y < h - 1 ? p + w : -1]) {
+        if (q >= 0 && lab[q] === -1 && L[q] > thr) { lab[q] = id; stack.push(q); }
+      }
+    }
+    if (n > bestN) { bestN = n; bestId = id; }
+    id++;
+  }
+  const frac = bestN / (w * h);
+  if (bestId < 0 || frac < 0.15 || frac > 0.97) return null;
+  // sudut = titik ekstrem pada diagonal
+  let tl = [0, 0, Infinity], tr = [0, 0, -Infinity], br = [0, 0, -Infinity], bl = [0, 0, Infinity];
+  for (let i = 0; i < w * h; i++) {
+    if (lab[i] !== bestId) continue;
+    const x = i % w, y = (i / w) | 0;
+    if (x + y < tl[2]) tl = [x, y, x + y];
+    if (x + y > br[2]) br = [x, y, x + y];
+    if (x - y > tr[2]) tr = [x, y, x - y];
+    if (x - y < bl[2]) bl = [x, y, x - y];
+  }
+  const q = [tl, tr, br, bl].map(([x, y]) => [Math.min(1, (x + 0.5) / w), Math.min(1, (y + 0.5) / h)]);
+  const area = Math.abs(((q[0][0] * q[1][1] - q[1][0] * q[0][1]) + (q[1][0] * q[2][1] - q[2][0] * q[1][1]) +
+    (q[2][0] * q[3][1] - q[3][0] * q[2][1]) + (q[3][0] * q[0][1] - q[0][0] * q[3][1])) / 2);
+  if (area < 0.15 || area > 0.96) return null;
+  // jika luas kuadrilateral jauh lebih kecil dari area kertas, bentuknya tidak wajar
+  if (area < frac * 0.8) return null;
+  return q;
+}
+
+/* ---------- editor potong & putar ---------- */
+const ed = { pg: null, bmp: null, rot: 0, quad: null };
+
+async function openEditor(pg) {
+  ed.pg = pg; ed.rot = pg.rot; ed.quad = (pg.quad || FULL()).map((p) => p.slice());
+  try { ed.bmp = await createImageBitmap(pg.blob); } catch { ed.bmp = pg.small; }
+  $('#editor').hidden = false;
+  document.body.style.overflow = 'hidden';
+  drawEditor();
+}
+function closeEditor() {
+  $('#editor').hidden = true;
+  document.body.style.overflow = '';
+  if (ed.bmp && ed.bmp.close) ed.bmp.close();
+  ed.pg = ed.bmp = null;
+}
+function drawEditor() {
+  const stage = $('#edStage');
+  const maxW = stage.clientWidth - 32, maxH = stage.clientHeight - 32;
+  const src = rotateTo(ed.bmp, ed.rot, 1400);
+  const s = Math.min(maxW / src.width, maxH / src.height);
+  const cw = Math.round(src.width * s), ch = Math.round(src.height * s);
+  const cv = $('#edCanvas');
+  cv.width = src.width; cv.height = src.height;
+  cv.getContext('2d').drawImage(src, 0, 0);
+  cv.style.width = cw + 'px'; cv.style.height = ch + 'px';
+  $('#edWrap').style.width = cw + 'px'; $('#edWrap').style.height = ch + 'px';
+  const svg = $('#edSvg');
+  svg.setAttribute('viewBox', `0 0 ${cw} ${ch}`);
+  svg.style.width = cw + 'px'; svg.style.height = ch + 'px';
+  drawHandles();
+}
+function drawHandles() {
+  const svg = $('#edSvg');
+  const cw = parseFloat(svg.style.width), ch = parseFloat(svg.style.height);
+  const pts = ed.quad.map(([x, y]) => [x * cw, y * ch]);
+  const poly = pts.map((p) => p.join(',')).join(' ');
+  svg.innerHTML =
+    `<path d="M0 0H${cw}V${ch}H0Z M${pts.map((p) => p.join(' ')).join(' L')}Z" fill="rgba(0,0,0,.45)" fill-rule="evenodd"/>` +
+    `<polygon points="${poly}" fill="none" stroke="#14b8a6" stroke-width="2.5"/>` +
+    pts.map((p, i) => `<g data-i="${i}" class="hd"><circle cx="${p[0]}" cy="${p[1]}" r="26" fill="transparent"/>` +
+      `<circle cx="${p[0]}" cy="${p[1]}" r="11" fill="#fff" stroke="#14b8a6" stroke-width="4"/></g>`).join('');
+}
+
+let drag = -1;
+$('#edSvg').addEventListener('pointerdown', (e) => {
+  const g = e.target.closest('.hd');
+  if (!g) return;
+  drag = +g.dataset.i;
+  $('#edSvg').setPointerCapture(e.pointerId);
+  e.preventDefault();
+});
+$('#edSvg').addEventListener('pointermove', (e) => {
+  if (drag < 0) return;
+  const r = $('#edSvg').getBoundingClientRect();
+  ed.quad[drag] = [
+    Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)),
+    Math.max(0, Math.min(1, (e.clientY - r.top) / r.height)),
+  ];
+  drawHandles();
+});
+['pointerup', 'pointercancel'].forEach((t) => $('#edSvg').addEventListener(t, () => (drag = -1)));
+
+$('#edRotL').addEventListener('click', () => { ed.rot = (ed.rot + 270) % 360; ed.quad = rotQuad(ed.quad, -1); drawEditor(); });
+$('#edRotR').addEventListener('click', () => { ed.rot = (ed.rot + 90) % 360; ed.quad = rotQuad(ed.quad, 1); drawEditor(); });
+$('#edFull').addEventListener('click', () => { ed.quad = FULL(); drawHandles(); });
+$('#edAuto').addEventListener('click', () => {
+  const q = detectQuad($('#edCanvas'));
+  if (q) { ed.quad = q; drawHandles(); } else alert('Tepi dokumen tidak terdeteksi. Silakan geser titik sudut secara manual.');
+});
+$('#edCancel').addEventListener('click', closeEditor);
+$('#edOk').addEventListener('click', () => {
+  ed.pg.rot = ed.rot;
+  ed.pg.quad = isFullQuad(ed.quad) ? null : ed.quad;
+  closeEditor();
+  clearResult();
+  renderPages();
+});
+window.addEventListener('resize', () => { if (!$('#editor').hidden) drawEditor(); });
 
 /** Abu-abu + perentangan kontras otomatis (1%–99%). */
 function filterGray(img) {
@@ -775,7 +1059,7 @@ $('#makeScan').addEventListener('click', async () => {
       btn.textContent = `Memproses halaman ${i + 1}/${scan.pages.length}…`;
       const pg = scan.pages[i];
       const bmp = await createImageBitmap(pg.blob);
-      const c = processCanvas(bmp, pg.rot, scan.mode, maxSide);
+      const c = processCanvas(bmp, pg.rot, scan.mode, maxSide, pg.quad);
       bmp.close && bmp.close();
       const blob = await new Promise((r) => c.toBlob(r, 'image/jpeg', q));
       jpgs.push({ blob, w: c.width, h: c.height });
@@ -819,6 +1103,11 @@ function showResult(files) {
 }
 function clearResult() { scan.result = null; $('#scanResult').hidden = true; }
 
+$('#resKompres').addEventListener('click', () => {
+  if (!scan.result) return;
+  showTab('kompres');
+  addFiles(scan.result);
+});
 $('#resShare').addEventListener('click', () => scan.result && shareFiles(scan.result));
 $('#resDl').addEventListener('click', async () => {
   if (!scan.result) return;
